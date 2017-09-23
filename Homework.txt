@@ -1,0 +1,62 @@
+Obtain all data
+SELECT * from surveys;
+all_survey_data.csv
+
+Obtain data for body size differences between genders and species
+SELECT species_id, sex, hindfoot_length, weight FROM surveys;
+size_differences_among_sexes_data.csv
+
+Obtain data only for spectabilis population, when caught + what sex
+SELECT month, day, year, sex FROM surveys WHERE species_id = "DS";
+spectabilis_population_data.csv
+
+Obtain data only for MALE spectabilis population, when caught
+SELECT month, day, year FROM surveys WHERE (species_id = "DS" and sex = "M");
+spectabilis_population_data_males.csv
+
+Obtain data only for FEMALE spectabilis population, when caught
+SELECT month, day, year FROM surveys WHERE (species_id = "DS" and sex = "F");
+spectabilis_population_data_females.csv
+
+Obtain data for greatest weight of rodent, showing species_id, year, and weight
+SELECT surveys.species_id, year, weight FROM surveys JOIN species ON surveys.species_id = species.species_id ORDER BY weight DESC, hindfoot_length DESC, year DESC LIMIT 100;
+100_largest_indviduals.csv
+
+Obtain data for dates sampled with no duplicates
+SELECT month, day, year FROM surveys GROUP BY month, day, year ORDER BY year ASC;
+
+Obtain data with no missing information
+SELECT month, day, year, species_id, weight FROM surveys WHERE (weight IS NOT NULL AND species_id IS NOT NULL);
+no_missing_data.csv
+
+Obtain data for dates sampled with no duplicates of species DS
+SELECT month, day, year FROM surveys WHERE (species_id = "DS") GROUP BY month, day, year ORDER BY year ASC;
+dates_with_dipodomys_spectabilis.csv
+
+Obtain data for total counts per year not including NULL values
+SELECT year, COUNT(*) AS total_abundance FROM surveys WHERE (species_id IS NOT NULL) GROUP BY year ORDER BY year ASC;
+total_abundance_by_year.csv
+
+Obtain data for the number of individuals of each species captured in each year and the total biomass of these individuals (in kg)
+SELECT year, species_id, COUNT(*), ROUND(SUM(weight/1000.),3) FROM surveys WHERE (species_id IS NOT NULL) GROUP BY year, species_id ORDER BY year ASC, species_id ASC;
+mass_abundance_data.csv
+
+Obtain data for dates, genus and species for each individual captured
+SELECT month, day, year, genus, species FROM surveys JOIN species ON surveys.species_id = species.species_id;
+species_captures_by_data.csv
+
+Obtain data for dates, genus, species, plot_id, and plot_type for each individual captured
+SELECT month, day, year, genus, species, surveys.plot_id, plot_type FROM surveys JOIN species ON surveys.species_id = species.species_id JOIN plots ON surveys.plot_id = plots.plot_id;
+species_plot_data.csv
+
+Obtain data for genus, species, taxa of non-rodents that are caught on control plots
+SELECT genus, species, taxa FROM species JOIN surveys ON species.species_id = surveys.species_id JOIN plots on surveys.plot_id = plots.plot_id WHERE (taxa != "Rodent" and plot_type = "Control") GROUP BY surveys.species_id;
+non_rodents_on_controls.csv
+
+Obtain data for year, genus, species, weight, and plot type for rodents caught in Control or Long-term Krat Exclosure plots, ignoring unknown species and null weights
+SELECT year, genus, species, weight, plot_type FROM surveys JOIN plots ON plots.plot_id = surveys.plot_id JOIN species ON species.species_id = surveys.species_id WHERE (plot_type = "Control" OR plot_type = "Long-term Krat Exclosure") AND (taxa = "Rodent" AND weight IS NOT NULL AND species != "sp.");
+size_comparison_controls_vs_krat_exclosures.csv
+
+Obtain data for total rodents caught on each plot type
+SELECT plot_type, COUNT(*) FROM surveys JOIN species ON species.species_id = surveys.species_id JOIN plots ON plots.plot_id = surveys.plot_id WHERE (taxa = "Rodent") GROUP BY plot_type;
+individuals_per_plot_type.csv
